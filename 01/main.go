@@ -43,6 +43,7 @@ func main() {
 
 func partOne() {
 	file, err := os.Open("01/input.txt")
+	defer file.Close()
 	must(err)
 
 	scanner := bufio.NewScanner(file)
@@ -71,6 +72,7 @@ func partOne() {
 
 func partTwo() {
 	file, err := os.Open("01/input.txt")
+	defer file.Close()
 	must(err)
 
 	scanner := bufio.NewScanner(file)
