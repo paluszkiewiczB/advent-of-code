@@ -71,28 +71,26 @@ func partTwo(s []strategy) int {
 	return points
 }
 
+var winningMoves = map[shape]shape{
+	rock:     paper,
+	paper:    scissors,
+	scissors: rock,
+}
+
+var losingMoves = map[shape]shape{
+	rock:     scissors,
+	paper:    rock,
+	scissors: paper,
+}
+
 func findMyShape(s strategy) shape {
 	switch s.result {
 	case draw:
 		return s.shape
 	case win:
-		switch s.shape {
-		case rock:
-			return paper
-		case paper:
-			return scissors
-		case scissors:
-			return rock
-		}
+		return winningMoves[s.shape]
 	case lose:
-		switch s.shape {
-		case rock:
-			return scissors
-		case paper:
-			return rock
-		case scissors:
-			return paper
-		}
+		return losingMoves[s.shape]
 	}
 
 	panic(fmt.Errorf("unsupported result: %s", s.shape))
