@@ -26,9 +26,25 @@ var (
 	}
 )
 
+type strategy struct {
+	shape
+	result
+}
+
+type result = string
+
+const (
+	lose result = "lose"
+	draw result = "draw"
+	win  result = "win"
+)
+
 func main() {
 	m := readMoves()
-	fmt.Printf("part one points: %d", partOne(m))
+	fmt.Printf("part one points: %d\n", partOne(m))
+
+	s := readStrategy()
+	fmt.Printf("part two points: %d\n", partTwo(s))
 }
 
 func partOne(m []move) int {
@@ -39,6 +55,47 @@ func partOne(m []move) int {
 	}
 
 	return points
+}
+
+func partTwo(s []strategy) int {
+	var points int
+	for _, strat := range s {
+		myShape := findMyShape(strat)
+		points += shapePoints[myShape]
+		points += calculateMatchPoints(move{
+			opponent: strat.shape,
+			my:       myShape,
+		})
+	}
+
+	return points
+}
+
+func findMyShape(s strategy) shape {
+	switch s.result {
+	case draw:
+		return s.shape
+	case win:
+		switch s.shape {
+		case rock:
+			return paper
+		case paper:
+			return scissors
+		case scissors:
+			return rock
+		}
+	case lose:
+		switch s.shape {
+		case rock:
+			return scissors
+		case paper:
+			return rock
+		case scissors:
+			return paper
+		}
+	}
+
+	panic(fmt.Errorf("unsupported result: %s", s.shape))
 }
 
 func calculateMatchPoints(m move) int {
@@ -73,12 +130,8 @@ var myMoves = map[uint8]shape{
 }
 
 func readMoves() []move {
-	file, err := os.Open("input.txt")
-	defer file.Close()
-	must(err)
-
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
+	scanner, closeFunc := readInput()
+	defer closeFunc()
 
 	moves := make([]move, 0)
 	for scanner.Scan() {
@@ -93,6 +146,42 @@ func readMoves() []move {
 	}
 
 	return moves
+}
+
+var results = map[uint8]result{
+	'X': lose,
+	'Y': draw,
+	'Z': win,
+}
+
+func readStrategy() []strategy {
+	scanner, closeFunc := readInput()
+	defer closeFunc()
+
+	strats := make([]strategy, 0)
+	for scanner.Scan() {
+		line := scanner.Text()
+		m, mok := opponentMoves[line[0]]
+		r, rok := results[line[2]]
+		if !mok || !rok {
+			panic(fmt.Errorf("could not read strategy: %s. found values: %s, %s", line, m, r))
+		}
+		strats = append(strats, strategy{
+			shape:  m,
+			result: r,
+		})
+	}
+
+	return strats
+}
+
+func readInput() (s *bufio.Scanner, closeFunc func() error) {
+	file, err := os.Open("input.txt")
+	must(err)
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	return scanner, file.Close
 }
 
 func must(err error) {
