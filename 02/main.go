@@ -14,21 +14,14 @@ const (
 	scissors shape = "scissors"
 )
 
-type move struct {
-	opponent, my shape
+var shapePoints = map[shape]int{
+	rock:     1,
+	paper:    2,
+	scissors: 3,
 }
 
-var (
-	shapePoints = map[shape]int{
-		rock:     1,
-		paper:    2,
-		scissors: 3,
-	}
-)
-
-type strategy struct {
-	shape
-	result
+type move struct {
+	opponent, my shape
 }
 
 type result = string
@@ -39,11 +32,16 @@ const (
 	win  result = "win"
 )
 
+type strategy struct {
+	shape
+	result
+}
+
 func main() {
 	m := readMoves()
 	fmt.Printf("part one points: %d\n", partOne(m))
 
-	s := readStrategy()
+	s := readStrategies()
 	fmt.Printf("part two points: %d\n", partTwo(s))
 }
 
@@ -101,16 +99,8 @@ func calculateMatchPoints(m move) int {
 		return 3
 	}
 
-	if m.opponent == rock && m.my == paper {
-		return 6
-	}
-
-	if m.opponent == scissors && m.my == rock {
-		return 6
-	}
-
-	if m.opponent == paper && m.my == scissors {
-		return 6
+	if winningMoves[m.opponent] == m.my {
+		return 3
 	}
 
 	return 0
@@ -152,7 +142,7 @@ var results = map[uint8]result{
 	'Z': win,
 }
 
-func readStrategy() []strategy {
+func readStrategies() []strategy {
 	scanner, closeFunc := readInput()
 	defer closeFunc()
 
