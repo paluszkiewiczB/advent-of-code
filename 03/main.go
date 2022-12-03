@@ -15,28 +15,35 @@ func main() {
 type item = rune
 
 func partTwo() int {
+	c := make(chan [3]string)
+	go readGroups(c)
+	var sum int
+	for group := range c {
+		b := findBadge(group)
+		sum += calcPriority(b)
+	}
+
+	return sum
+}
+
+func readGroups(c chan [3]string) {
 	scanner, closeFunc := readInput()
 	defer closeFunc()
 
-	badges := make([]item, 0)
 	group := [3]string{}
-	var i, sum int
+	var i int
 	for scanner.Scan() {
 		line := scanner.Text()
 		group[i] = line
 		if i == 2 {
-			badges = append(badges, findBadge(group))
+			c <- group
 			i = 0
 		} else {
 			i++
 		}
 	}
 
-	for _, b := range badges {
-		sum += calcPriority(b)
-	}
-
-	return sum
+	close(c)
 }
 
 func findBadge(group [3]string) item {
