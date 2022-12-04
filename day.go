@@ -57,7 +57,7 @@ func main() {
 	log.Printf("committing directory: %s", day)
 	err = exec.Command("git", "add", ".").Run()
 	must(err)
-	err = exec.Command("git", "commit", "-m", fmt.Sprintf("\"chore(%s): setting up day %s\"", day, day)).Run()
+	err = exec.Command("git", "commit", "-m", fmt.Sprintf("chore(%s): setting up day %s", day, day)).Run()
 	must(err)
 }
 
