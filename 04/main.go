@@ -3,14 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	fmt.Printf("part one: %d", partOne())
+	fmt.Printf("part one: %d\n", partOne())
+	fmt.Printf("part two: %d\n", partTwo())
 }
 
 type sections struct {
@@ -19,6 +19,32 @@ type sections struct {
 
 type pair struct {
 	a, b sections
+}
+
+func partTwo() int {
+	scanner, closeFunc := readInput()
+	defer closeFunc()
+
+	var count int
+	for scanner.Scan() {
+		l := scanner.Text()
+		sections := strings.Split(l, ",")
+		pair := parsePair(sections)
+		if partiallyOverlaps(pair) {
+			count++
+		}
+	}
+
+	return count
+}
+
+func partiallyOverlaps(p pair) bool {
+	l, r := p.a, p.b
+	if r.from < l.from || (l.from == r.from && r.to > l.to) {
+		l, r = r, l
+	}
+
+	return l.to >= r.from
 }
 
 func partOne() int {
@@ -30,7 +56,7 @@ func partOne() int {
 		l := scanner.Text()
 		sections := strings.Split(l, ",")
 		pair := parsePair(sections)
-		if overlaps(pair) {
+		if fullyOverlaps(pair) {
 			count++
 		}
 	}
@@ -38,19 +64,13 @@ func partOne() int {
 	return count
 }
 
-func overlaps(p pair) bool {
+func fullyOverlaps(p pair) bool {
 	l, r := p.a, p.b
 	if r.from < l.from || (l.from == r.from && r.to > l.to) {
 		l, r = r, l
 	}
 
-	if l.to >= r.to {
-		//log.Printf("overlaps for: %v", p)
-		return true
-	}
-
-	log.Printf("does not overlap for: %v", p)
-	return false
+	return l.to >= r.to
 }
 
 func parsePair(p []string) pair {
