@@ -24,10 +24,18 @@ repository root
 | |- go.sum
 | |- task.md
 ```
+
 - task.md - description of the task
 - main.go - implementation of the solution
 - input.txt - input for the task
-- go.mod, go.sum - files describing Go module's properties (not needed if you don't have dependencies), see [official reference](https://go.dev/doc/modules/gomod-ref)
+- go.mod, go.sum - files describing Go module's properties (not needed if you don't have dependencies),
+  see [official reference](https://go.dev/doc/modules/gomod-ref)
+
+To setup new day (e.g. 5) run:
+
+```shell
+go run day.go 5
+```
 
 ## Run
 
