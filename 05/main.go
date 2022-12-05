@@ -11,6 +11,7 @@ import (
 
 func main() {
 	fmt.Printf("part one: %s\n", partOne())
+	fmt.Printf("part two: %s\n", partTwo())
 }
 
 type stack struct {
@@ -45,6 +46,37 @@ func (s *stack) push(r rune) {
 
 type move struct {
 	count, from, to int
+}
+
+func partTwo() string {
+	c := make(chan string)
+	go readInput(c)
+
+	stacks := parseStacks(c)
+	printStacks(stacks)
+
+	m := make(chan move)
+	go parseMoves(c, m)
+	for mv := range m {
+		if mv.count > 1 {
+			tmp := newStack()
+			for i := 0; i < mv.count; i++ {
+				tmp.push(stacks[mv.from].pop())
+			}
+
+			for i := 0; i < mv.count; i++ {
+				stacks[mv.to].push(tmp.pop())
+			}
+		} else {
+			stacks[mv.to].push(stacks[mv.from].pop())
+		}
+	}
+
+	sb := strings.Builder{}
+	for _, s := range stacks {
+		sb.WriteRune(s.pop())
+	}
+	return sb.String()
 }
 
 func partOne() string {
