@@ -42,8 +42,10 @@ func main() {
 	_, err = io.Copy(mainD, mainS)
 	must(err)
 
-	log.Printf("creating input.txt and task.md")
+	log.Printf("creating input.txt, sample-input.txt and task.md")
 	_, err = os.Create("input.txt")
+	must(err)
+	_, err = os.Create("sample-input.txt")
 	must(err)
 	_, err = os.Create("task.md")
 	must(err)
