@@ -58,17 +58,18 @@ func partTwo() string {
 	m := make(chan move)
 	go parseMoves(c, m)
 	for mv := range m {
-		if mv.count > 1 {
-			tmp := newStack()
-			for i := 0; i < mv.count; i++ {
-				tmp.push(stacks[mv.from].pop())
-			}
-
-			for i := 0; i < mv.count; i++ {
-				stacks[mv.to].push(tmp.pop())
-			}
-		} else {
+		if mv.count == 1 {
 			stacks[mv.to].push(stacks[mv.from].pop())
+			continue
+		}
+
+		tmp := newStack()
+		for i := 0; i < mv.count; i++ {
+			tmp.push(stacks[mv.from].pop())
+		}
+
+		for i := 0; i < mv.count; i++ {
+			stacks[mv.to].push(tmp.pop())
 		}
 	}
 
