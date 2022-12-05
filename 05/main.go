@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	println("hello world")
+
 }
 
 func readInput() (s *bufio.Scanner, closeFunc func() error) {
