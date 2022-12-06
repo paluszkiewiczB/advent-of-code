@@ -26,11 +26,9 @@ The first time a marker appears is after the seventh character arrives. Once it 
 
 Here are a few more examples:
 
-```text
-    bvwbjplbgvbhsrlpgdmjqwftvncz: first marker after character 5
-    nppdvjthqldpwncqszvftbrmjlhg: first marker after character 6
-    nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg: first marker after character 10
-    zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw: first marker after character 11
-```
+- `bvwbjplbgvbhsrlpgdmjqwftvncz`: first marker after character 5
+- `nppdvjthqldpwncqszvftbrmjlhg`: first marker after character 6
+- `nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`: first marker after character 10
+- `zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`: first marker after character 11
 
 How many characters need to be processed before the first start-of-packet marker is detected?
