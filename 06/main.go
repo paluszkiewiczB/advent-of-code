@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	//fmt.Printf("part two: %d\n", partTwo())
+	fmt.Printf("part two: %d\n", partTwo())
 }
 
 type marker struct {
@@ -59,19 +59,15 @@ func partOne() int {
 	for r := range c {
 		if existing, ok := m.m[r]; ok {
 			nm := newMarker(4)
-			//fmt.Printf("rewriting from %d to %d\n", existing+1, pos)
 			for i := existing + 1; i < pos; i++ {
 				nm.add(i, m.atIndex(i))
-				//fmt.Printf("after write: %s\n", nm.String())
 			}
 			m = nm
 		}
 		m.add(pos, r)
 		if m.len() == 4 {
-			//fmt.Printf("size reached at pos: %d with marker: %s\n", pos, m.String())
 			return m.get(r)
 		}
-		//fmt.Printf("pos: %d, marker: %s\n", pos, m.String())
 		pos++
 	}
 
@@ -80,9 +76,23 @@ func partOne() int {
 
 func partTwo() int {
 	c := make(chan rune)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
+	go readInput(c, "input.txt")
+	pos := 1
+	m := newMarker(14)
+	for r := range c {
+		if existing, ok := m.m[r]; ok {
+			nm := newMarker(14)
+			for i := existing + 1; i < pos; i++ {
+				nm.add(i, m.atIndex(i))
+			}
+			m = nm
+		}
+		m.add(pos, r)
+		if m.len() == 14 {
+			//fmt.Printf("size reached at pos: %d with marker: %s\n", pos, m.String())
+			return m.get(r)
+		}
+		pos++
 	}
 
 	return -1
