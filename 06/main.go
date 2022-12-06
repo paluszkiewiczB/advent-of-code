@@ -29,7 +29,7 @@ func (m *marker) add(i int, r rune) {
 	m.r[i] = r
 }
 
-func (m *marker) get(r rune) int {
+func (m *marker) indexOf(r rune) int {
 	return m.m[r]
 }
 
@@ -66,7 +66,7 @@ func partOne() int {
 		}
 		m.add(pos, r)
 		if m.len() == 4 {
-			return m.get(r)
+			return m.indexOf(r)
 		}
 		pos++
 	}
@@ -90,7 +90,7 @@ func partTwo() int {
 		m.add(pos, r)
 		if m.len() == 14 {
 			//fmt.Printf("size reached at pos: %d with marker: %s\n", pos, m.String())
-			return m.get(r)
+			return m.indexOf(r)
 		}
 		pos++
 	}
