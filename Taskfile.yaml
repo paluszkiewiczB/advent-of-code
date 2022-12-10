@@ -1,0 +1,25 @@
+version: 3
+tasks:
+  day:
+    cmds:
+      - |
+        last=$(ls -d */ | grep -E "[0-9]+" | cut -d '/' -f1 | sort -n | tail -n 1)
+        next=$(printf "%02d" $((last+1)))
+        echo "creating day: $next"
+        mkdir "$next"
+        
+        echo "copying template"
+        cp template/* "$next/"
+        
+        cd "$next"
+        
+        echo "creating empty files for inputs and task"
+        touch input.txt sample-input.txt task.md
+        
+        echo "creating go module"
+        go mod init interactor.dev/advent-of-code/"$next"
+        go mod tidy
+
+        echo "committing changes"
+        git add .
+        git commit -m "chore($next): setting up the day"

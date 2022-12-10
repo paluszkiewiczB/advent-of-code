@@ -34,7 +34,7 @@ repository root
 To setup new day (e.g. 5) run:
 
 ```shell
-go run day.go 5
+task day
 ```
 
 ## Run
