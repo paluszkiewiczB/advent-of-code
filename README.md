@@ -31,7 +31,7 @@ repository root
 - go.mod, go.sum - files describing Go module's properties (not needed if you don't have dependencies),
   see [official reference](https://go.dev/doc/modules/gomod-ref)
 
-To setup new day (e.g. 5) run:
+To set up new day (e.g. 5) run:
 
 ```shell
 task day
