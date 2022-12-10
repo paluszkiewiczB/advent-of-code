@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,7 +12,9 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	//fmt.Printf("part two: %s\n", partTwo())
+	fmt.Printf("part two: %d\n", partTwo())
+	//partOne()
+	//partTwo()
 }
 
 type dir struct {
@@ -48,6 +51,42 @@ func partOne() int {
 	}
 
 	return total
+}
+
+func partTwo() int {
+	c := make(chan string)
+	go readInput(c, "input.txt")
+
+	root := parseCd(<-c)
+
+	fsC := make(chan dir)
+	fs := make(map[string]int)
+	go func() {
+		for d := range fsC {
+			if ex, ok := fs[d.name]; ok {
+				fs[d.name] = ex + d.size
+			} else {
+				fs[d.name] = d.size
+			}
+		}
+	}()
+
+	parseDir(c, fsC, root)
+	close(fsC)
+
+	diskTotal := 70000000
+	rootSize := fs["/"]
+	freeSpace := diskTotal - rootSize
+	toFreeUp := 30000000 - freeSpace
+
+	smallest := math.MaxInt
+	for _, size := range fs {
+		if size >= toFreeUp && size < smallest {
+			smallest = size
+		}
+	}
+
+	return smallest
 }
 
 func parseDir(c chan string, fs chan dir, wd string) {
@@ -101,11 +140,15 @@ func parseLs(c chan string, fs chan dir, wd string) string {
 }
 
 func parentDirs(dir string) []string {
+	if dir == "/" {
+		return []string{}
+	}
+
 	out := make([]string, 0)
 	for {
 		dir = filepath.Dir(dir)
 		if dir == "/" {
-			return out
+			return append(out, dir)
 		}
 		out = append(out, dir)
 	}
@@ -122,16 +165,6 @@ func childOf(parent string) func(c string) string {
 
 func parseCd(cd string) string {
 	return strings.Split(cd, "$ cd ")[1]
-}
-
-func partTwo() string {
-	c := make(chan string)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
-	}
-
-	return "todo"
 }
 
 func readInput(c chan string, fileName string) {
