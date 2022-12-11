@@ -4,21 +4,145 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
-	fmt.Printf("part one: %s\n", partOne())
+	fmt.Printf("part one: %d\n", partOne())
 	fmt.Printf("part two: %s\n", partTwo())
 }
 
-func partOne() string {
+type height uint8
+type grid [][]height
+
+func (g grid) String() string {
+	sb := strings.Builder{}
+	for _, row := range g {
+		for _, h := range row {
+			sb.WriteRune(rune(h + '0'))
+		}
+		sb.WriteRune('\n')
+	}
+	return sb.String()
+}
+
+func partOne() int {
 	c := make(chan string)
-	go readInput(c, "sample-input.txt")
+	go readInput(c, "input.txt")
+
+	g := grid(make([][]height, 0))
 	for s := range c {
-		println(s)
+		row := parseRow(s)
+		g = append(g, row)
 	}
 
-	return "todo"
+	var trees int
+
+	for i := 1; i < len(g)-1; i++ { // skips first and last row
+		for j := 1; j < len(g[i])-1; j++ { // skips first and last column
+			if isVisible(g, i, j) {
+				trees++
+			}
+		}
+	}
+
+	trees += 2 * len(g)    // top and bottom row
+	trees += 2 * len(g[0]) // first and last column
+	trees -= 4             // corners were counted twice
+	return trees
+}
+
+func isVisible(g grid, i, j int) bool {
+	return isVisibleFromTop(g, i, j) ||
+		isVisibleFromLeft(g, i, j) ||
+		isVisibleFromRight(g, i, j) ||
+		isVisibleFromBottom(g, i, j)
+}
+
+func isVisibleFromBottom(g grid, initialRow, column int) bool {
+	h := g[initialRow][column]
+	tallest := height(0)
+	for row := initialRow + 1; row < len(g); row++ {
+		n := g[row][column]
+		if n > tallest {
+			tallest = n
+		}
+	}
+
+	if h > tallest {
+		//fmt.Printf("tree visible from bottom: [%d][%d]\n", initialRow, column)
+		return true
+	}
+
+	//fmt.Printf("tree not visible from bottom: [%d][%d]\n", initialRow, column)
+	return false
+}
+
+func isVisibleFromRight(g grid, row, initialColumn int) bool {
+	h := g[row][initialColumn]
+	tallest := height(0)
+	for column := initialColumn + 1; column < len(g[row]); column++ {
+		n := g[row][column]
+		if n > tallest {
+			tallest = n
+		}
+	}
+
+	if h > tallest {
+		//fmt.Printf("tree visible from right: [%d][%d]\n", row, initialColumn)
+		return true
+	}
+
+	//fmt.Printf("tree not visible from right: [%d][%d]\n", row, initialColumn)
+	return false
+}
+
+func isVisibleFromLeft(g grid, row, initialColumn int) bool {
+	h := g[row][initialColumn]
+	tallest := height(0)
+	for column := initialColumn - 1; column >= 0; column-- {
+		n := g[row][column]
+		if n > tallest {
+			tallest = n
+		}
+	}
+
+	if h > tallest {
+		//fmt.Printf("tree visible from left: [%d][%d]\n", row, initialColumn)
+		return true
+	}
+
+	//fmt.Printf("tree not visible from left: [%d][%d]\n", row, initialColumn)
+	return false
+}
+
+func isVisibleFromTop(g grid, initialRow, column int) bool {
+	h := g[initialRow][column]
+	tallest := height(0)
+	for row := initialRow - 1; row >= 0; row-- {
+		n := g[row][column]
+		if n > tallest {
+			tallest = n
+		}
+	}
+
+	if h > tallest {
+		//fmt.Printf("tree visible from top: [%d][%d]\n", initialRow, column)
+		return true
+	}
+	//fmt.Printf("tree not visible from top: [%d][%d]\n", initialRow, column)
+	return false
+}
+
+func parseRow(row string) []height {
+	out := make([]height, len(row))
+
+	for i := 0; i < len(row); i++ {
+		h := row[i] - '0'
+		out[i] = height(h)
+	}
+
+	return out
 }
 
 func partTwo() string {
