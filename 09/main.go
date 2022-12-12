@@ -13,39 +13,16 @@ func main() {
 	fmt.Printf("part two: %d\n", partTwo())
 }
 
-type state struct {
-	head, tail *point
-}
-
 type rope struct {
-	knots [10]*point
+	knots []*point
 }
 
-func newRope(initial point) *rope {
-	knots := [10]*point{}
-	for i := 0; i < 10; i++ {
+func newRope(initial point, size int) *rope {
+	knots := make([]*point, size)
+	for i := 0; i < size; i++ {
 		knots[i] = &point{x: initial.x, y: initial.y}
 	}
 	return &rope{knots: knots}
-}
-
-func (s *state) String() string {
-	table := [5][6]rune{}
-	table[s.tail.x][s.tail.y] = 'T'
-	table[s.head.x][s.head.y] = 'H'
-	sb := strings.Builder{}
-	for _, row := range table {
-		for _, c := range row {
-			symbol := c
-			if c == 0 {
-				symbol = '.'
-			}
-			sb.WriteRune(symbol)
-			sb.WriteRune(' ')
-		}
-		sb.WriteRune('\n')
-	}
-	return sb.String()
 }
 
 type point struct {
@@ -68,23 +45,9 @@ func partTwo() int {
 	m := make(chan move)
 	go readMoves(c, m)
 
-	r := newRope(point{x: 4, y: 0})
+	r := newRope(point{x: 4, y: 0}, 10)
 
-	visited := make(map[point]struct{})
-	visit := func() {
-		visited[*r.knots[9]] = struct{}{}
-	}
-
-	visit()
-	for mv := range m {
-		moveHead(r.knots[0], mv)
-		for i := 1; i < len(r.knots); i++ {
-			updateTail(r.knots[i-1], r.knots[i])
-		}
-		visit()
-	}
-
-	return len(visited)
+	return moveTheRope(r, m)
 }
 
 func partOne() int {
@@ -94,20 +57,23 @@ func partOne() int {
 	m := make(chan move)
 	go readMoves(c, m)
 
-	s := &state{
-		head: &point{x: 4, y: 0},
-		tail: &point{x: 4, y: 0},
-	}
+	r := newRope(point{x: 4, y: 0}, 2)
 
+	return moveTheRope(r, m)
+}
+
+func moveTheRope(r *rope, m chan move) int {
 	visited := make(map[point]struct{})
 	visit := func() {
-		visited[*s.tail] = struct{}{}
+		visited[*r.knots[len(r.knots)-1]] = struct{}{}
 	}
 
 	visit()
 	for mv := range m {
-		moveHead(s.head, mv)
-		updateTail(s.head, s.tail)
+		moveHead(r.knots[0], mv)
+		for i := 1; i < len(r.knots); i++ {
+			updateTail(r.knots[i-1], r.knots[i])
+		}
 		visit()
 	}
 
