@@ -69,13 +69,7 @@ func isVisibleFromBottom(g grid, initialRow, column int) bool {
 		}
 	}
 
-	if h > tallest {
-		//fmt.Printf("tree visible from bottom: [%d][%d]\n", initialRow, column)
-		return true
-	}
-
-	//fmt.Printf("tree not visible from bottom: [%d][%d]\n", initialRow, column)
-	return false
+	return h > tallest
 }
 
 func isVisibleFromRight(g grid, row, initialColumn int) bool {
@@ -88,13 +82,7 @@ func isVisibleFromRight(g grid, row, initialColumn int) bool {
 		}
 	}
 
-	if h > tallest {
-		//fmt.Printf("tree visible from right: [%d][%d]\n", row, initialColumn)
-		return true
-	}
-
-	//fmt.Printf("tree not visible from right: [%d][%d]\n", row, initialColumn)
-	return false
+	return h > tallest
 }
 
 func isVisibleFromLeft(g grid, row, initialColumn int) bool {
@@ -107,13 +95,7 @@ func isVisibleFromLeft(g grid, row, initialColumn int) bool {
 		}
 	}
 
-	if h > tallest {
-		//fmt.Printf("tree visible from left: [%d][%d]\n", row, initialColumn)
-		return true
-	}
-
-	//fmt.Printf("tree not visible from left: [%d][%d]\n", row, initialColumn)
-	return false
+	return h > tallest
 }
 
 func isVisibleFromTop(g grid, initialRow, column int) bool {
@@ -126,12 +108,7 @@ func isVisibleFromTop(g grid, initialRow, column int) bool {
 		}
 	}
 
-	if h > tallest {
-		//fmt.Printf("tree visible from top: [%d][%d]\n", initialRow, column)
-		return true
-	}
-	//fmt.Printf("tree not visible from top: [%d][%d]\n", initialRow, column)
-	return false
+	return h > tallest
 }
 
 func parseRow(row string) []height {
