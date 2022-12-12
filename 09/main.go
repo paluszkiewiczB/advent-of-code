@@ -10,11 +10,23 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	fmt.Printf("part two: %s\n", partTwo())
+	fmt.Printf("part two: %d\n", partTwo())
 }
 
 type state struct {
 	head, tail *point
+}
+
+type rope struct {
+	knots [10]*point
+}
+
+func newRope(initial point) *rope {
+	knots := [10]*point{}
+	for i := 0; i < 10; i++ {
+		knots[i] = &point{x: initial.x, y: initial.y}
+	}
+	return &rope{knots: knots}
 }
 
 func (s *state) String() string {
@@ -49,6 +61,30 @@ const (
 	D move = 'D'
 )
 
+func partTwo() int {
+	c := make(chan string)
+	go readInput(c, "input.txt")
+
+	m := make(chan move)
+	go readMoves(c, m)
+
+	r := newRope(point{x: 4, y: 0})
+
+	visited := make(map[point]struct{})
+	visit := func() {
+		visited[*r.knots[9]] = struct{}{}
+	}
+	//
+	visit()
+	//for mv := range m {
+	//	moveHead(s, mv)
+	//	updateTail(s)
+	//	visit()
+	//}
+
+	return len(visited)
+}
+
 func partOne() int {
 	c := make(chan string)
 	go readInput(c, "input.txt")
@@ -68,73 +104,73 @@ func partOne() int {
 
 	visit()
 	for mv := range m {
-		moveHead(s, mv)
-		updateTail(s)
+		moveHead(s.head, mv)
+		updateTail(s.head, s.tail)
 		visit()
 	}
 
 	return len(visited)
 }
 
-func moveHead(s *state, mv move) {
+func moveHead(p *point, mv move) {
 	switch mv {
 	case U:
-		s.head.x--
+		p.x--
 	case L:
-		s.head.y--
+		p.y--
 	case R:
-		s.head.y++
+		p.y++
 	case D:
-		s.head.x++
+		p.x++
 	}
 }
 
-func updateTail(s *state) {
+func updateTail(prev, next *point) {
 	// head and tail are in the same row
-	if s.head.x == s.tail.x {
-		if s.head.y-s.tail.y == 2 {
-			s.tail.y++
+	if prev.x == next.x {
+		if prev.y-next.y == 2 {
+			next.y++
 			return
 		}
 
-		if s.tail.y-s.head.y == 2 {
-			s.tail.y--
+		if next.y-prev.y == 2 {
+			next.y--
 			return
 		}
 		return
 	}
 
 	// head and tail are in the same column
-	if s.head.y == s.tail.y {
-		if s.head.x-s.tail.x == 2 {
-			s.tail.x++
+	if prev.y == next.y {
+		if prev.x-next.x == 2 {
+			next.x++
 			return
 		}
 
-		if s.tail.x-s.head.x == 2 {
-			s.tail.x--
+		if next.x-prev.x == 2 {
+			next.x--
 			return
 		}
 		return
 	}
 
 	// head and tail are on the diagonal
-	if xDist := s.head.x - s.tail.x; xDist == 1 || xDist == -1 {
-		if yDist := s.head.y - s.tail.y; yDist == 1 || yDist == -1 {
+	if xDist := prev.x - next.x; xDist == 1 || xDist == -1 {
+		if yDist := prev.y - next.y; yDist == 1 || yDist == -1 {
 			return
 		}
 	}
 
 	// head and tail must be in different rows/columns but not touching diagonally
-	if s.head.x > s.tail.x {
-		s.tail.x++
+	if prev.x > next.x {
+		next.x++
 	} else {
-		s.tail.x--
+		next.x--
 	}
-	if s.head.y > s.tail.y {
-		s.tail.y++
+	if prev.y > next.y {
+		next.y++
 	} else {
-		s.tail.y--
+		next.y--
 	}
 }
 
@@ -157,16 +193,6 @@ func readMoves(c chan string, m chan move) {
 	}
 
 	close(m)
-}
-
-func partTwo() string {
-	c := make(chan string)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
-	}
-
-	return "todo"
 }
 
 func readInput(c chan string, fileName string) {
