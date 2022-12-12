@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	fmt.Printf("part two: %s\n", partTwo())
+	fmt.Printf("part two: %d\n", partTwo())
 }
 
 type height uint8
@@ -24,6 +24,92 @@ func (g grid) String() string {
 		sb.WriteRune('\n')
 	}
 	return sb.String()
+}
+
+func partTwo() int {
+	c := make(chan string)
+	go readInput(c, "input.txt")
+
+	g := grid(make([][]height, 0))
+	for s := range c {
+		row := parseRow(s)
+		g = append(g, row)
+	}
+
+	var maxDistance int
+	for i := 0; i < len(g); i++ {
+		for j := 0; j < len(g[i]); j++ {
+			vt := countVisibleTress(g, i, j)
+			vd := calculateViewingDistance(vt)
+
+			if vd > maxDistance {
+				maxDistance = vd
+			}
+		}
+	}
+
+	return maxDistance
+}
+
+func countVisibleTress(g grid, i, j int) [4]int {
+	return [4]int{
+		countTopVisibleTrees(g, i, j),
+		countLeftVisibleTrees(g, i, j),
+		countRightVisibleTrees(g, i, j),
+		countBottomVisibleTrees(g, i, j),
+	}
+}
+
+func countTopVisibleTrees(g grid, initialRow, column int) int {
+	h := g[initialRow][column]
+	for row := initialRow - 1; row >= 0; row-- {
+		if n := g[row][column]; n >= h {
+			return initialRow - row
+		}
+	}
+
+	return initialRow
+}
+
+func countLeftVisibleTrees(g grid, row, initialColumn int) int {
+	h := g[row][initialColumn]
+	for column := initialColumn - 1; column >= 0; column-- {
+		if n := g[row][column]; n >= h {
+			return initialColumn - column
+		}
+	}
+
+	return initialColumn
+}
+
+func countRightVisibleTrees(g grid, row, initialColumn int) int {
+	h := g[row][initialColumn]
+	for column := initialColumn + 1; column < len(g[row]); column++ {
+		if n := g[row][column]; n >= h {
+			return column - initialColumn
+		}
+	}
+
+	return len(g[row]) - 1 - initialColumn
+}
+
+func countBottomVisibleTrees(g grid, initialRow, column int) int {
+	h := g[initialRow][column]
+	for row := initialRow + 1; row < len(g); row++ {
+		if n := g[row][column]; n >= h {
+			return row - initialRow
+		}
+	}
+
+	return len(g) - 1 - initialRow
+}
+
+func calculateViewingDistance(vt [4]int) int {
+	d := 1
+	for _, v := range vt {
+		d *= v
+	}
+	return d
 }
 
 func partOne() int {
@@ -120,16 +206,6 @@ func parseRow(row string) []height {
 	}
 
 	return out
-}
-
-func partTwo() string {
-	c := make(chan string)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
-	}
-
-	return "todo"
 }
 
 func readInput(c chan string, fileName string) {
