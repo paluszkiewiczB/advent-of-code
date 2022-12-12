@@ -74,13 +74,15 @@ func partTwo() int {
 	visit := func() {
 		visited[*r.knots[9]] = struct{}{}
 	}
-	//
+
 	visit()
-	//for mv := range m {
-	//	moveHead(s, mv)
-	//	updateTail(s)
-	//	visit()
-	//}
+	for mv := range m {
+		moveHead(r.knots[0], mv)
+		for i := 1; i < len(r.knots); i++ {
+			updateTail(r.knots[i-1], r.knots[i])
+		}
+		visit()
+	}
 
 	return len(visited)
 }
@@ -125,52 +127,52 @@ func moveHead(p *point, mv move) {
 	}
 }
 
-func updateTail(prev, next *point) {
+func updateTail(prev, current *point) {
 	// head and tail are in the same row
-	if prev.x == next.x {
-		if prev.y-next.y == 2 {
-			next.y++
+	if prev.x == current.x {
+		if prev.y-current.y == 2 {
+			current.y++
 			return
 		}
 
-		if next.y-prev.y == 2 {
-			next.y--
+		if current.y-prev.y == 2 {
+			current.y--
 			return
 		}
 		return
 	}
 
 	// head and tail are in the same column
-	if prev.y == next.y {
-		if prev.x-next.x == 2 {
-			next.x++
+	if prev.y == current.y {
+		if prev.x-current.x == 2 {
+			current.x++
 			return
 		}
 
-		if next.x-prev.x == 2 {
-			next.x--
+		if current.x-prev.x == 2 {
+			current.x--
 			return
 		}
 		return
 	}
 
 	// head and tail are on the diagonal
-	if xDist := prev.x - next.x; xDist == 1 || xDist == -1 {
-		if yDist := prev.y - next.y; yDist == 1 || yDist == -1 {
+	if xDist := prev.x - current.x; xDist == 1 || xDist == -1 {
+		if yDist := prev.y - current.y; yDist == 1 || yDist == -1 {
 			return
 		}
 	}
 
 	// head and tail must be in different rows/columns but not touching diagonally
-	if prev.x > next.x {
-		next.x++
+	if prev.x > current.x {
+		current.x++
 	} else {
-		next.x--
+		current.x--
 	}
-	if prev.y > next.y {
-		next.y++
+	if prev.y > current.y {
+		current.y++
 	} else {
-		next.y--
+		current.y--
 	}
 }
 
