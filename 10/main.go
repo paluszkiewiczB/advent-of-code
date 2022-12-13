@@ -10,7 +10,7 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	//fmt.Printf("part two: %s\n", partTwo())
+	fmt.Printf("part two: \n%s\n", partTwo())
 }
 
 func partOne() int {
@@ -57,12 +57,39 @@ func partOne() int {
 
 func partTwo() string {
 	c := make(chan string)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
+	go readInput(c, "input.txt")
+
+	cycle, spritePos := 1, 1
+	sb := strings.Builder{}
+	nextCycle := func() {
+		pixelPos := cycle - 1
+		if pixelPos == spritePos-1 || pixelPos == spritePos || pixelPos == spritePos+1 {
+			sb.WriteRune('#')
+		} else {
+			sb.WriteRune('.')
+		}
+		if cycle%40 == 0 {
+			sb.WriteRune('\n')
+			cycle = 0
+		}
+		cycle++
 	}
 
-	return "todo"
+	for s := range c {
+		if s == "noop" {
+			nextCycle()
+			continue
+		}
+
+		add := strings.Split(s, " ")
+		v, err := strconv.Atoi(add[1])
+		must(err)
+		nextCycle()
+		nextCycle()
+		spritePos += v
+	}
+
+	return sb.String()
 }
 
 func readInput(c chan string, fileName string) {
