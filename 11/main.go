@@ -10,15 +10,15 @@ import (
 
 func main() {
 	fmt.Printf("part one: %d\n", partOne())
-	//fmt.Printf("part two: %s\n", partTwo())
+	fmt.Printf("part two: %d\n", partTwo())
 }
 
 type monkey struct {
 	number                int
 	startingItems         []int
 	operation             func(int) int
-	test                  func(int) bool
 	trueThrow, falseThrow int
+	divisibleBy           int
 }
 
 func (m *monkey) String() string {
@@ -36,56 +36,79 @@ func partOne() int {
 		monkeys = append(monkeys, mo)
 	}
 
-	iC := make(chan int)
-	inspectionsC := make(chan map[int]int)
-	go func() {
-		inspectionCount := make(map[int]int)
-		for monkeyIndex := range iC {
-			current := inspectionCount[monkeyIndex]
-			inspectionCount[monkeyIndex] = current + 1
-		}
-		inspectionsC <- inspectionCount
-	}()
+	modFactor := 1
+	for _, mo := range monkeys {
+		modFactor *= mo.divisibleBy
+	}
+	fmt.Printf("mod factor: %d\n", modFactor)
+
+	inspections := make(map[int]int)
+	inspect := func(mo, items int) {
+		current := inspections[mo]
+		inspections[mo] = current + items
+	}
 
 	for i := 0; i < 20; i++ {
 		for _, mo := range monkeys {
 			for _, item := range mo.startingItems {
 				worryLvl := mo.operation(item)
 				worryLvl /= 3
-				if mo.test(worryLvl) {
+				worryLvl %= modFactor
+				if worryLvl%mo.divisibleBy == 0 {
 					monkeys[mo.trueThrow].startingItems = append(monkeys[mo.trueThrow].startingItems, worryLvl)
 				} else {
 					monkeys[mo.falseThrow].startingItems = append(monkeys[mo.falseThrow].startingItems, worryLvl)
 				}
-				iC <- mo.number
 			}
+			inspect(mo.number, len(mo.startingItems))
+			mo.startingItems = make([]int, 0)
+		}
+	}
+
+	return calculateMonkeyBusiness(inspections)
+}
+
+func partTwo() int {
+	c := make(chan string)
+	go readInput(c, "input.txt")
+	m := make(chan *monkey)
+	go parseMonkeys(c, m)
+
+	monkeys := make([]*monkey, 0)
+	for mo := range m {
+		monkeys = append(monkeys, mo)
+	}
+
+	modFactor := 1
+	for _, mo := range monkeys {
+		modFactor *= mo.divisibleBy
+	}
+	fmt.Printf("mod factor: %d\n", modFactor)
+
+	inspections := make(map[int]int)
+	inspect := func(mo, items int) {
+		current := inspections[mo]
+		inspections[mo] = current + items
+	}
+
+	for i := 0; i < 10000; i++ {
+		for _, mo := range monkeys {
+			for _, item := range mo.startingItems {
+				worryLvl := mo.operation(item)
+				worryLvl %= modFactor
+				if worryLvl%mo.divisibleBy == 0 {
+					monkeys[mo.trueThrow].startingItems = append(monkeys[mo.trueThrow].startingItems, worryLvl)
+				} else {
+					monkeys[mo.falseThrow].startingItems = append(monkeys[mo.falseThrow].startingItems, worryLvl)
+				}
+			}
+			inspect(mo.number, len(mo.startingItems))
 			mo.startingItems = make([]int, 0)
 		}
 
-		//fmt.Printf("After round: %d\n", i)
-		//for _, mo := range monkeys {
-		//	fmt.Println(mo)
-		//}
 	}
 
-	close(iC)
-
-	max, preMax := 0, 0
-	inspections := <-inspectionsC
-	for _, count := range inspections {
-		//fmt.Printf("Monkey: %d inspected items %d times\n", mo, count)
-		if count > max {
-			max, preMax = count, max
-			continue
-		}
-
-		if count > preMax {
-			preMax = count
-		}
-	}
-
-	//fmt.Printf("max: %d, premax: %d\n", max, preMax)
-	return max * preMax
+	return calculateMonkeyBusiness(inspections)
 }
 
 func parseMonkeys(c <-chan string, m chan<- *monkey) {
@@ -143,9 +166,6 @@ func parseMonkey(buff [6]string) *monkey {
 	testLine := buff[3]
 	testString := testLine[len("  Test: divisible by "):]
 	divisibleBy := mustParseInt(testString)
-	test := func(a int) bool {
-		return a%divisibleBy == 0
-	}
 
 	trueLine := buff[4]
 	trueString := trueLine[len("    If true: throw to monkey "):]
@@ -159,7 +179,7 @@ func parseMonkey(buff [6]string) *monkey {
 		number:        num,
 		startingItems: startingItems,
 		operation:     operation,
-		test:          test,
+		divisibleBy:   divisibleBy,
 		trueThrow:     trueMonkeyNo,
 		falseThrow:    falseMonkeyNo,
 	}
@@ -171,14 +191,20 @@ func mustParseInt(s string) int {
 	return v
 }
 
-func partTwo() string {
-	c := make(chan string)
-	go readInput(c, "sample-input.txt")
-	for s := range c {
-		println(s)
+func calculateMonkeyBusiness(inspections map[int]int) int {
+	max, preMax := 0, 0
+	for _, count := range inspections {
+		if count > max {
+			max, preMax = count, max
+			continue
+		}
+
+		if count > preMax {
+			preMax = count
+		}
 	}
 
-	return "todo"
+	return max * preMax
 }
 
 func readInput(c chan<- string, fileName string) {
